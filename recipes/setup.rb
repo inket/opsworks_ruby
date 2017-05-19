@@ -9,14 +9,6 @@ prepare_recipe
 
 # Ruby and bundler
 include_recipe 'deployer'
-if node['platform_family'] == 'debian'
-  include_recipe 'ruby-ng::dev'
-else
-  ruby_pkg_version = node['ruby-ng']['ruby_version'].split('.')[0..1]
-  package "ruby#{ruby_pkg_version.join('')}"
-  package "ruby#{ruby_pkg_version.join('')}-devel"
-  execute "/usr/sbin/alternatives --set ruby /usr/bin/ruby#{ruby_pkg_version.join('.')}"
-end
 
 apt_repository 'apache2' do
   uri 'http://ppa.launchpad.net/ondrej/apache2/ubuntu'

@@ -12,7 +12,6 @@ chef_version '~> 12.0' if respond_to?(:chef_version)
 depends 'deployer'
 depends 'chef_nginx'
 depends 'logrotate'
-depends 'ruby-ng'
 
 supports 'amazon', '>= 2015.03'
 supports 'ubuntu', '>= 12.04'
