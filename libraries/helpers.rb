@@ -14,6 +14,14 @@ def rdses
   search(:aws_opsworks_rds_db_instance)
 end
 
+def layers
+  aws_instance = search(:aws_opsworks_instance, "hostname:#{node["hostname"].upcase}").first
+  aws_instance["layer_ids"].map do |layer_id|
+    layer = search(:aws_opsworks_layer, "layer_id:#{layer_id}").first
+    layer ? layer["shortname"] : nil
+  end.compact
+end
+
 def globals(index, application)
   globals = (node['deploy'][application].try(:[], 'global') || {}).symbolize_keys
   return globals[index.to_sym] unless globals[index.to_sym].nil?

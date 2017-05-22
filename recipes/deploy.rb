@@ -88,6 +88,10 @@ every_enabled_application do |application|
         :deploy_before_restart, context: self, items: databases + [scm, framework, appserver, worker, webserver]
       )
 
+      if layers.include?("admin")
+        run_callback_from_file(File.join(release_path, 'deploy', 'before_admin_restart.rb'))
+      end
+
       run_callback_from_file(File.join(release_path, 'deploy', 'before_restart.rb'))
     end
 
