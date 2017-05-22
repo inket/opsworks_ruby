@@ -101,7 +101,7 @@ default['defaults']['framework']['adapter'] = 'rails'
 
 default['defaults']['framework']['migrate'] = true
 default['defaults']['framework']['migration_command'] =
-  'if /usr/local/bin/bundle exec rake db:version > /dev/null 2>&1; ' \
+  'if /usr/local/bin/bundle exec rake db:version > log/db-version.log 2>&1; ' \
   'then /usr/local/bin/bundle exec rake db:migrate; ' \
   'else /usr/local/bin/bundle exec rake db:setup; ' \
   'fi'
