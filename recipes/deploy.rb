@@ -62,6 +62,7 @@ every_enabled_application do |application|
     migration_command(framework.out[:migration_command]) if framework.out[:migration_command]
     migrate framework.out[:migrate]
     before_migrate do
+      Chef::Log.warn("opsworks_ruby::before_migrate")
       perform_ruby_build
       perform_bundle_install(shared_path, bundle_env)
 
