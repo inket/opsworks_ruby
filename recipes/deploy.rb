@@ -62,6 +62,7 @@ every_enabled_application do |application|
     migration_command(framework.out[:migration_command]) if framework.out[:migration_command]
     migrate framework.out[:migrate]
     before_migrate do
+      perform_ruby_build
       perform_bundle_install(shared_path, bundle_env)
 
       fire_hook(
@@ -72,6 +73,7 @@ every_enabled_application do |application|
     end
 
     before_symlink do
+      perform_ruby_build unless framework.out[:migrate]
       perform_bundle_install(shared_path, bundle_env) unless framework.out[:migrate]
 
       fire_hook(

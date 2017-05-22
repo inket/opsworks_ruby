@@ -3,4 +3,6 @@
 source 'https://supermarket.chef.io'
 solver :ruby, :required
 
+cookbook "ruby_build"
+
 metadata

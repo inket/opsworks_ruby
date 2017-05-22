@@ -19,20 +19,6 @@ apt_repository 'apache2' do
   only_if { node['platform'] == 'ubuntu' }
 end
 
-gem_package 'bundler' do
-  action :install
-end
-
-if node['platform_family'] == 'debian'
-  link '/usr/local/bin/bundle' do
-    to '/usr/bin/bundle'
-  end
-else
-  link '/usr/local/bin/bundle' do
-    to '/usr/local/bin/bundler'
-  end
-end
-
 execute 'yum-config-manager --enable epel' if node['platform_family'] == 'rhel'
 
 every_enabled_application do |application|

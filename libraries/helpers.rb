@@ -79,6 +79,28 @@ def every_enabled_rds(context, application)
   end
 end
 
+def perform_ruby_build
+  ruby_version = File.read(File.join(release_path, '.ruby-version')).strip
+
+  Chef::Log.info("Currently installed ruby version: #{`ruby -v`}")
+  Chef::Log.info("Installing detected ruby version: #{ruby_version} (from .ruby-version)")
+
+  include_recipe 'ruby_build::default'
+  ruby_build_ruby ruby_version do
+    prefix_path "/usr/local"
+  end
+
+  Chef::Log.info("Installed ruby version: #{`ruby -v`}")
+
+  gem_package 'bundler' do
+    action :install
+  end
+
+  link '/usr/local/bin/bundle' do
+    to '/usr/local/bin/bundler'
+  end
+end
+
 def perform_bundle_install(shared_path, envs = {})
   bundle_path = "#{shared_path}/vendor/bundle"
 
