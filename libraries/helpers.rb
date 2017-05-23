@@ -158,6 +158,21 @@ def perform_yarn_install
   include_recipe 'yarn::upgrade_package'
   Chef::Log.info("Installed yarn version: #{`yarn --version`}")
 
+  Chef::Log.info('Linking node_modules to shared node_modules…')
+  shared_node_modules_path = File.join(release_path, '..', '..', 'shared', 'node_modules')
+  directory shared_node_modules_path do
+    owner node['deployer']['user'] || 'root'
+    group node['deployer']['group'] || 'root'
+    mode '0755'
+    recursive true
+    action :create
+  end
+
+  node_modules_path = File.join(release_path, 'node_modules')
+  link node_modules_path do
+    to shared_node_modules_path
+  end
+
   Chef::Log.info('Running yarn install…')
   yarn_install_production release_path do
     user node['deployer']['user'] || 'root'
