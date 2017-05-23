@@ -90,12 +90,12 @@ end
 def perform_ruby_build
   ruby_version = File.read(File.join(release_path, '.ruby-version')).strip
 
-  Chef::Log.info("Currently installed ruby version: #{`ruby -v`}")
+  Chef::Log.info("Currently installed ruby version: #{`ruby -v`}") rescue nil
   Chef::Log.info("Installing detected ruby version: #{ruby_version} (from .ruby-version)")
 
   include_recipe 'ruby_build::default'
   ruby_build_ruby ruby_version do
-    prefix_path "/usr/local"
+    prefix_path '/usr/local'
   end
 
   Chef::Log.info("Installed ruby version: #{`ruby -v`}")
@@ -118,6 +118,50 @@ def perform_bundle_install(shared_path, envs = {})
     group www_group
     environment envs
     cwd release_path
+  end
+end
+
+def perform_node_install
+  Chef::Log.info("Currently installed node version: #{`node -v`}") rescue nil
+
+  nvmrc_path = File.join(release_path, '.nvmrc')
+
+  unless File.exist?(nvmrc_path)
+    Chef::Log.warn("No .nvmrc file found in project. Skipping nodejs install.")
+    return
+  end
+
+  node_version = File.read(nvmrc_path).strip
+  node.default['nodejs']['version'] = node_version
+
+  Chef::Log.info("Installing detected nodejs version: #{node_version} (from .nvmrc)")
+  include_recipe 'nodejs::nodejs_from_binary'
+  Chef::Log.info("Installed node version: #{`node -v`}")
+end
+
+def perform_yarn_install
+  Chef::Log.info("Currently installed yarn version: #{`yarn --version`}") rescue nil
+
+  package_json_path = File.join(release_path, 'package.json')
+
+  unless File.exist?(package_json_path)
+    Chef::Log.warn('No package.json file found in project. Skipping yarn install.')
+    return
+  end
+
+  unless (`node -v` rescue nil)
+    Chef::Log.warn('No nodejs installed. Skipping yarn install.')
+    return
+  end
+
+  Chef::Log.info('Installing the latest version of yarn…')
+  include_recipe 'yarn::upgrade_package'
+  Chef::Log.info("Installed yarn version: #{`yarn --version`}")
+
+  Chef::Log.info('Running yarn install…')
+  yarn_install_production release_path do
+    user node['deployer']['user'] || 'root'
+    action :run
   end
 end
 

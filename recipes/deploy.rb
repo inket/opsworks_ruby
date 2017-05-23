@@ -62,9 +62,10 @@ every_enabled_application do |application|
     migration_command(framework.out[:migration_command]) if framework.out[:migration_command]
     migrate framework.out[:migrate]
     before_migrate do
-      Chef::Log.warn("opsworks_ruby::before_migrate")
       perform_ruby_build
       perform_bundle_install(shared_path, bundle_env)
+      perform_node_install
+      perform_yarn_install
 
       fire_hook(
         :deploy_before_migrate, context: self, items: databases + [scm, framework, appserver, worker, webserver]
@@ -74,8 +75,12 @@ every_enabled_application do |application|
     end
 
     before_symlink do
-      perform_ruby_build unless framework.out[:migrate]
-      perform_bundle_install(shared_path, bundle_env) unless framework.out[:migrate]
+      unless framework.out[:migrate]
+        perform_ruby_build
+        perform_bundle_install(shared_path, bundle_env)
+        perform_node_install
+        perform_yarn_install
+      end
 
       fire_hook(
         :deploy_before_symlink, context: self, items: databases + [scm, framework, appserver, worker, webserver]

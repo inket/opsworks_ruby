@@ -13,6 +13,8 @@ depends 'deployer'
 depends 'chef_nginx'
 depends 'logrotate'
 depends 'ruby_build'
+depends 'nodejs'
+depends 'yarn'
 
 supports 'amazon', '>= 2015.03'
 supports 'ubuntu', '>= 12.04'
