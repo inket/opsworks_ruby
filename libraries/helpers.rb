@@ -15,6 +15,9 @@ def rdses
 end
 
 def layers
+  if Chef::Config[:solo]
+    Chef::Log.warn('This recipe uses search. Chef Solo does not support search.')
+  end
   aws_instance = search(:aws_opsworks_instance, "hostname:#{node["hostname"].upcase}").first
   aws_instance["layer_ids"].map do |layer_id|
     layer = search(:aws_opsworks_layer, "layer_id:#{layer_id}").first
@@ -90,15 +93,17 @@ end
 def perform_ruby_build
   ruby_version = File.read(File.join(release_path, '.ruby-version')).strip
 
-  Chef::Log.info("Currently installed ruby version: #{`ruby -v`}") rescue nil
-  Chef::Log.info("Installing detected ruby version: #{ruby_version} (from .ruby-version)")
+  log "Currently installed ruby version: #{`ruby -v` rescue "(none)"}"
+  log "Installing detected ruby version: #{ruby_version} (from .ruby-version)"
 
   include_recipe 'ruby_build::default'
   ruby_build_ruby ruby_version do
     prefix_path '/usr/local'
   end
 
-  Chef::Log.info("Installed ruby version: #{`ruby -v`}")
+  execute "echo 'Installed ruby version:' $(ruby -v)" do
+    live_stream true
+  end
 
   gem_package 'bundler' do
     action :install
@@ -122,53 +127,46 @@ def perform_bundle_install(shared_path, envs = {})
 end
 
 def perform_node_install
-  Chef::Log.info("Currently installed node version: #{`node -v`}") rescue nil
+  log "Currently installed node version: #{`node -v` rescue "(none)"}"
 
   nvmrc_path = File.join(release_path, '.nvmrc')
 
-  unless File.exist?(nvmrc_path)
-    Chef::Log.warn("No .nvmrc file found in project. Skipping nodejs install.")
-    return
+  log 'No .nvmrc file found in project. Skipping nodejs install.' do
+    level :warn
+    not_if { File.exist?(nvmrc_path) }
   end
+  return unless File.exist?(nvmrc_path)
 
   node_version = File.read(nvmrc_path).strip
   node.default['nodejs']['version'] = node_version
 
-  Chef::Log.info("Installing detected nodejs version: #{node_version} (from .nvmrc)")
+  log "Installing detected nodejs version: #{node_version} (from .nvmrc)"
   include_recipe 'nodejs::nodejs_from_binary'
 
-  execute 'verify node install' do
-    command 'node -v'
-    retries 5
+  execute "echo 'Installed node version:' $(node -v)" do
+    live_stream true
   end
-  Chef::Log.info("Installed node version: #{`node -v`}")
 end
 
 def perform_yarn_install
-  Chef::Log.info("Currently installed yarn version: #{`yarn --version`}") rescue nil
+  log "Currently installed yarn version: #{`yarn --version` rescue "(none)"}"
 
   package_json_path = File.join(release_path, 'package.json')
 
-  unless File.exist?(package_json_path)
-    Chef::Log.warn('No package.json file found in project. Skipping yarn install.')
-    return
+  log 'No package.json file found in project. Skipping yarn install.' do
+    level :warn
+    not_if { File.exist?(package_json_path) }
   end
+  return unless File.exist?(package_json_path)
 
-  unless (`node -v` rescue nil)
-    Chef::Log.warn('No nodejs installed. Skipping yarn install.')
-    return
-  end
-
-  Chef::Log.info('Installing the latest version of yarn…')
+  log 'Installing the latest version of yarn…'
   include_recipe 'yarn::upgrade_package'
 
-  execute 'verify yarn install' do
-    command 'yarn --version'
-    retries 5
+  execute "echo 'Installed yarn version:' $(yarn --version)" do
+    live_stream true
   end
-  Chef::Log.info("Installed yarn version: #{`yarn --version`}")
 
-  Chef::Log.info('Linking node_modules to shared node_modules…')
+  log 'Linking node_modules to shared node_modules…'
   shared_node_modules_path = File.join(release_path, '..', '..', 'shared', 'node_modules')
   directory shared_node_modules_path do
     owner node['deployer']['user'] || 'root'
@@ -183,7 +181,7 @@ def perform_yarn_install
     to shared_node_modules_path
   end
 
-  Chef::Log.info('Running yarn install…')
+  log 'Running yarn install…'
   yarn_install_production release_path do
     user node['deployer']['user'] || 'root'
     action :run

@@ -64,6 +64,8 @@ every_enabled_application do |application|
     before_migrate do
       perform_ruby_build
       perform_bundle_install(shared_path, bundle_env)
+      perform_node_install
+      perform_yarn_install
 
       fire_hook(
         :deploy_before_migrate, context: self, items: databases + [scm, framework, appserver, worker, webserver]
@@ -76,6 +78,8 @@ every_enabled_application do |application|
       unless framework.out[:migrate]
         perform_ruby_build
         perform_bundle_install(shared_path, bundle_env)
+        perform_node_install
+        perform_yarn_install
       end
 
       fire_hook(
@@ -89,9 +93,6 @@ every_enabled_application do |application|
       fire_hook(
         :deploy_before_restart, context: self, items: databases + [scm, framework, appserver, worker, webserver]
       )
-
-      perform_node_install
-      perform_yarn_install
 
       if layers.include?("admin")
         run_callback_from_file(File.join(release_path, 'deploy', 'before_admin_restart.rb'))
