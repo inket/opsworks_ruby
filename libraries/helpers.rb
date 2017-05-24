@@ -136,6 +136,11 @@ def perform_node_install
 
   Chef::Log.info("Installing detected nodejs version: #{node_version} (from .nvmrc)")
   include_recipe 'nodejs::nodejs_from_binary'
+
+  execute 'verify node install' do
+    command 'node -v'
+    retries 5
+  end
   Chef::Log.info("Installed node version: #{`node -v`}")
 end
 
@@ -156,6 +161,11 @@ def perform_yarn_install
 
   Chef::Log.info('Installing the latest version of yarn…')
   include_recipe 'yarn::upgrade_package'
+
+  execute 'verify yarn install' do
+    command 'yarn --version'
+    retries 5
+  end
   Chef::Log.info("Installed yarn version: #{`yarn --version`}")
 
   Chef::Log.info('Linking node_modules to shared node_modules…')
