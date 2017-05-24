@@ -101,8 +101,11 @@ def perform_ruby_build
     prefix_path '/usr/local'
   end
 
-  execute "echo 'Installed ruby version:' $(ruby -v)" do
-    live_stream true
+  ruby_block "logging" do
+    block do
+      Chef::Log.info("Installed ruby version: #{`ruby -v`}".strip)
+    end
+    action :run
   end
 
   gem_package 'bundler' do
@@ -155,8 +158,11 @@ def perform_node_install
     action :install
   end
 
-  execute "echo 'Installed node version:' $(node -v)" do
-    live_stream true
+  ruby_block "logging" do
+    block do
+      Chef::Log.info("Installed node version: #{`node -v`}".strip)
+    end
+    action :run
   end
 end
 
@@ -171,14 +177,17 @@ def perform_yarn_install
   end
   return unless File.exist?(package_json_path)
 
-  log 'Installing the latest version of yarn…'
+  log 'Installing the latest version of yarn...'
   include_recipe 'yarn::upgrade_package'
 
-  execute "echo 'Installed yarn version:' $(yarn --version)" do
-    live_stream true
+  ruby_block "logging" do
+    block do
+      Chef::Log.info("Installed yarn version: #{`yarn --version`}".strip)
+    end
+    action :run
   end
 
-  log 'Linking node_modules to shared node_modules…'
+  log 'Linking node_modules to shared node_modules...'
   shared_node_modules_path = File.join(release_path, '..', '..', 'shared', 'node_modules')
   directory shared_node_modules_path do
     owner node['deployer']['user'] || 'root'
@@ -193,7 +202,7 @@ def perform_yarn_install
     to shared_node_modules_path
   end
 
-  log 'Running yarn install…'
+  log 'Running yarn install...'
   yarn_install_production release_path do
     user node['deployer']['user'] || 'root'
     action :run
