@@ -1,0 +1,15 @@
+<% ([@out[:process_count].to_i || 1].max).times do |n| %>
+    <% identifier = "#{@application}-#{n+1}" %>
+    <% log_file = "#{@deploy_to}/shared/log/hypernova.log" %>
+    <% pid_file = "#{@deploy_to}/shared/pids/hypernova_#{identifier}.pid" %>
+
+    check process hypernova_<%= identifier.to_s %>
+    with pidfile <%= pid_file.to_s %>
+    start program = "/bin/su - <%= node['deployer']['user'] %> -c 'cd <%= File.join(@deploy_to, 'current') %> && yarn hypernova > <%= log_file.to_s %> 2>&1 & echo $! > <%= pid_file.to_s %>'" with timeout 90 seconds
+    stop  program = "/bin/su - <%= node['deployer']['user'] %> -c 'kill -s TERM `cat <%= pid_file.to_s %>`'" with timeout 90 seconds
+    group hypernova_<%= @application.to_s %>_group
+
+    set httpd port 2182 and
+      use address localhost
+      allow localhost
+<% end %>
