@@ -24,8 +24,9 @@ every_enabled_application do |application|
   scm = Drivers::Scm::Factory.build(self, application)
   framework = Drivers::Framework::Factory.build(self, application, databases: databases)
   appserver = Drivers::Appserver::Factory.build(self, application, databases: databases)
+  renderer = Drivers::Renderer::Factory.build(self, application)
   worker = Drivers::Worker::Factory.build(self, application, databases: databases)
   webserver = Drivers::Webserver::Factory.build(self, application)
 
-  fire_hook(:configure, items: databases + [scm, framework, appserver, worker, webserver])
+  fire_hook(:configure, items: databases + [scm, framework, appserver, renderer, worker, webserver])
 end
