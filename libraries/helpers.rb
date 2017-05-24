@@ -138,10 +138,22 @@ def perform_node_install
   return unless File.exist?(nvmrc_path)
 
   node_version = File.read(nvmrc_path).strip
-  node.default['nodejs']['version'] = node_version
 
   log "Installing detected nodejs version: #{node_version} (from .nvmrc)"
-  include_recipe 'nodejs::nodejs_from_binary'
+
+  # Construct the URL for downloading the nodejs binary
+  prefix = 'https://nodejs.org/dist/'
+  version = "v#{node_version}/"
+  filename = "node-v#{node_version}-linux-x64.tar.gz"
+  nodejs_bin_url = ::URI.join(prefix, version, filename).to_s
+
+  # Install the nodejs binary using ark
+  ark 'nodejs-binary' do
+    url nodejs_bin_url
+    version node_version
+    has_binaries ['bin/node']
+    action :install
+  end
 
   execute "echo 'Installed node version:' $(node -v)" do
     live_stream true
