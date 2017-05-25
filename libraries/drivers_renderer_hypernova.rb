@@ -7,13 +7,11 @@ module Drivers
       output filter: %i[process_count]
       packages :monit
 
-      def self.enabled?(context, app, _options)
-        Chef::Log.warn("shortname: #{app['shortname']}")
-        releases = File.join('/srv/www/', app['shortname'], 'releases', '*')
-        Chef::Log.warn("releases: #{releases}")
-        Chef::Log.warn("contents: #{Dir[releases]}")
-        Chef::Log.warn("last: #{Dir[releases].last}")
-        release_path = Dir[File.join('/srv/www/', app['shortname'], 'releases', '*')].last
+      def enabled?
+        deploy_to = deploy_dir(app)
+        release_path = Dir[File.join(deploy_to, 'releases', '*')].last
+        return false unless release_path
+
         package_json_path = File.join(release_path, 'package.json')
         return false unless File.exist?(package_json_path)
 
@@ -26,6 +24,8 @@ module Drivers
       end
 
       def after_deploy
+        return unless enabled?
+
         restart_monit
       end
 

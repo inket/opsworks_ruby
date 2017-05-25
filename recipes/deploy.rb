@@ -13,12 +13,12 @@ every_enabled_application do |application|
   scm = Drivers::Scm::Factory.build(self, application)
   framework = Drivers::Framework::Factory.build(self, application, databases: databases)
   appserver = Drivers::Appserver::Factory.build(self, application)
-  renderer = Drivers::Renderer::Factory.build(self, application)
+  renderers = Drivers::Renderer::Factory.build(self, application)
   worker = Drivers::Worker::Factory.build(self, application, databases: databases)
   webserver = Drivers::Webserver::Factory.build(self, application)
   bundle_env = scm.class.adapter.to_s == 'Chef::Provider::Git' ? { 'GIT_SSH' => scm.out[:ssh_wrapper] } : {}
 
-  fire_hook(:before_deploy, items: databases + [scm, framework, appserver, renderer, worker, webserver])
+  fire_hook(:before_deploy, items: databases + renderers + [scm, framework, appserver, worker, webserver])
 
   deploy application['shortname'] do
     deploy_to deploy_dir(application)
@@ -69,7 +69,7 @@ every_enabled_application do |application|
       perform_yarn_install
 
       fire_hook(
-        :deploy_before_migrate, context: self, items: databases + [scm, framework, appserver, renderer, worker, webserver]
+        :deploy_before_migrate, context: self, items: databases + renderers + [scm, framework, appserver, worker, webserver]
       )
 
       run_callback_from_file(File.join(release_path, 'deploy', 'before_migrate.rb'))
@@ -84,7 +84,7 @@ every_enabled_application do |application|
       end
 
       fire_hook(
-        :deploy_before_symlink, context: self, items: databases + [scm, framework, appserver, renderer, worker, webserver]
+        :deploy_before_symlink, context: self, items: databases + renderers + [scm, framework, appserver, worker, webserver]
       )
 
       run_callback_from_file(File.join(release_path, 'deploy', 'before_symlink.rb'))
@@ -92,7 +92,7 @@ every_enabled_application do |application|
 
     before_restart do
       fire_hook(
-        :deploy_before_restart, context: self, items: databases + [scm, framework, appserver, renderer, worker, webserver]
+        :deploy_before_restart, context: self, items: databases + renderers + [scm, framework, appserver, worker, webserver]
       )
 
       if layers.include?("admin")
@@ -104,7 +104,7 @@ every_enabled_application do |application|
 
     after_restart do
       fire_hook(
-        :deploy_after_restart, context: self, items: databases + [scm, framework, appserver, renderer, worker, webserver]
+        :deploy_after_restart, context: self, items: databases + renderers + [scm, framework, appserver, worker, webserver]
       )
 
       run_callback_from_file(File.join(release_path, 'deploy', 'after_restart.rb'))
@@ -113,5 +113,5 @@ every_enabled_application do |application|
     timeout node['deploy']['timeout']
   end
 
-  fire_hook(:after_deploy, items: databases + [scm, framework, appserver, renderer, worker, webserver])
+  fire_hook(:after_deploy, items: databases + renderers + [scm, framework, appserver, worker, webserver])
 end
