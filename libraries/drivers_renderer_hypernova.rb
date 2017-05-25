@@ -7,10 +7,8 @@ module Drivers
       output filter: %i[process_count]
       packages :monit
 
-      def self.enabled?(context, _app, _options)
-        Chef::Log.info(context)
-        Chef::Log.info(context.respond_to?(:release_path))
-        return false
+      def self.enabled?(context, app, _options)
+        release_path = Dir[File.join('/srv/www/', app['shortname'], 'releases', '*')].last
         package_json_path = File.join(release_path, 'package.json')
         return false unless File.exist?(package_json_path)
 
