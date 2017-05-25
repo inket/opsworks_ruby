@@ -28,6 +28,12 @@ module Drivers
         opts = { application: app['shortname'], out: out, deploy_to: deploy_dir(app), environment: environment,
                  adapter: adapter }
 
+        context.template File.join(node['monit']['basedir'], "00_httpd.monitrc") do
+          mode '0640'
+          source "00_httpd.monitrc.erb"
+          variables opts
+        end
+
         context.template File.join(node['monit']['basedir'], "#{opts[:adapter]}_#{opts[:application]}.monitrc") do
           mode '0640'
           source "#{opts[:adapter]}.monitrc.erb"

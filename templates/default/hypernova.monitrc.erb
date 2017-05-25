@@ -8,8 +8,4 @@
     start program = "/bin/su - <%= node['deployer']['user'] %> -c 'cd <%= File.join(@deploy_to, 'current') %> && yarn hypernova > <%= log_file.to_s %> 2>&1 & echo $! > <%= pid_file.to_s %>'" with timeout 90 seconds
     stop  program = "/bin/su - <%= node['deployer']['user'] %> -c 'kill -s TERM `cat <%= pid_file.to_s %>`'" with timeout 90 seconds
     group hypernova_<%= @application.to_s %>_group
-
-    set httpd port 2182 and
-      use address localhost
-      allow localhost
 <% end %>
