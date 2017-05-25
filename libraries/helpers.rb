@@ -93,8 +93,12 @@ end
 def perform_ruby_build
   ruby_version = File.read(File.join(release_path, '.ruby-version')).strip
 
-  log "Currently installed ruby version: #{`ruby -v` rescue "(none)"}"
-  log "Installing detected ruby version: #{ruby_version} (from .ruby-version)"
+  log 'perform_ruby_build' do
+    message "Currently installed ruby version: #{`ruby -v` rescue "(none)"}"
+  end
+  log 'perform_ruby_build' do
+    message "Installing detected ruby version: #{ruby_version} (from .ruby-version)"
+  end
 
   include_recipe 'ruby_build::default'
   ruby_build_ruby ruby_version do
@@ -130,11 +134,14 @@ def perform_bundle_install(shared_path, envs = {})
 end
 
 def perform_node_install
-  log "Currently installed node version: #{`node -v` rescue "(none)"}"
+  log 'perform_node_install' do
+    message "Currently installed node version: #{`node -v` rescue "(none)"}"
+  end
 
   nvmrc_path = File.join(release_path, '.nvmrc')
 
-  log 'No .nvmrc file found in project. Skipping nodejs install.' do
+  log 'perform_node_install' do
+    message 'No .nvmrc file found in project. Skipping nodejs install.'
     level :warn
     not_if { File.exist?(nvmrc_path) }
   end
@@ -142,7 +149,9 @@ def perform_node_install
 
   node_version = File.read(nvmrc_path).strip
 
-  log "Installing detected nodejs version: #{node_version} (from .nvmrc)"
+  log 'perform_node_install' do
+    message "Installing detected nodejs version: #{node_version} (from .nvmrc)"
+  end
 
   # Construct the URL for downloading the nodejs binary
   prefix = 'https://nodejs.org/dist/'
@@ -167,17 +176,23 @@ def perform_node_install
 end
 
 def perform_yarn_install
-  log "Currently installed yarn version: #{`yarn --version` rescue "(none)"}"
+  log 'perform_yarn_install' do
+    message "Currently installed yarn version: #{`yarn --version` rescue "(none)"}"
+  end
 
   package_json_path = File.join(release_path, 'package.json')
 
-  log 'No package.json file found in project. Skipping yarn install.' do
+  log 'perform_yarn_install' do
+    message 'No package.json file found in project. Skipping yarn install.'
     level :warn
     not_if { File.exist?(package_json_path) }
   end
   return unless File.exist?(package_json_path)
 
-  log 'Installing the latest version of yarn...'
+  log 'perform_yarn_install' do
+    message 'Installing the latest version of yarn...'
+  end
+
   include_recipe 'yarn::upgrade_package'
 
   ruby_block "logging" do
@@ -187,7 +202,9 @@ def perform_yarn_install
     action :run
   end
 
-  log 'Linking node_modules to shared node_modules...'
+  log 'perform_yarn_install' do
+    message 'Linking node_modules to shared node_modules...'
+  end
   shared_node_modules_path = File.join(release_path, '..', '..', 'shared', 'node_modules')
   directory shared_node_modules_path do
     owner node['deployer']['user'] || 'root'
@@ -202,7 +219,9 @@ def perform_yarn_install
     to shared_node_modules_path
   end
 
-  log 'Running yarn install...'
+  log 'perform_yarn_install' do
+    message 'Running yarn install...'
+  end
   yarn_install_production release_path do
     user node['deployer']['user'] || 'root'
     action :run
