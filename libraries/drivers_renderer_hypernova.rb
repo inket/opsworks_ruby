@@ -8,6 +8,11 @@ module Drivers
       packages :monit
 
       def self.enabled?(context, app, _options)
+        Chef::Log.warn("shortname: #{app['shortname']}")
+        releases = File.join('/srv/www/', app['shortname'], 'releases', '*')
+        Chef::Log.warn("releases: #{releases}")
+        Chef::Log.warn("contents: #{Dir[releases]}")
+        Chef::Log.warn("last: #{Dir[releases].last}")
         release_path = Dir[File.join('/srv/www/', app['shortname'], 'releases', '*')].last
         package_json_path = File.join(release_path, 'package.json')
         return false unless File.exist?(package_json_path)
