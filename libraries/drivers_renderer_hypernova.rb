@@ -16,7 +16,7 @@ module Drivers
         return false unless File.exist?(package_json_path)
 
         scripts = JSON.parse(File.read(package_json_path))['scripts']
-        scripts.has_key?('hypernova')
+        scripts.has_key?('hypernova:start')
       end
 
       def configure
