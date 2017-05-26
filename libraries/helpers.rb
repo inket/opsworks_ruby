@@ -93,11 +93,11 @@ end
 def perform_ruby_build
   ruby_version = File.read(File.join(release_path, '.ruby-version')).strip
 
-  log 'perform_ruby_build' do
+  log 'perform_ruby_build_1' do
     message "Currently installed ruby version: #{`ruby -v` rescue "(none)"}"
     level :info
   end
-  log 'perform_ruby_build' do
+  log 'perform_ruby_build_2' do
     message "Installing detected ruby version: #{ruby_version} (from .ruby-version)"
     level :info
   end
@@ -107,7 +107,7 @@ def perform_ruby_build
     prefix_path '/usr/local'
   end
 
-  ruby_block "logging" do
+  ruby_block "perform_ruby_build_3" do
     block do
       Chef::Log.info("Installed ruby version: #{`ruby -v`}".strip)
     end
@@ -136,14 +136,14 @@ def perform_bundle_install(shared_path, envs = {})
 end
 
 def perform_node_install
-  log 'perform_node_install' do
+  log 'perform_node_install_1' do
     message "Currently installed node version: #{`node -v` rescue "(none)"}"
     level :info
   end
 
   nvmrc_path = File.join(release_path, '.nvmrc')
 
-  log 'perform_node_install' do
+  log 'perform_node_install_2' do
     message 'No .nvmrc file found in project. Skipping nodejs install.'
     level :warn
     not_if { File.exist?(nvmrc_path) }
@@ -152,7 +152,7 @@ def perform_node_install
 
   node_version = File.read(nvmrc_path).strip
 
-  log 'perform_node_install' do
+  log 'perform_node_install_3' do
     message "Installing detected nodejs version: #{node_version} (from .nvmrc)"
     level :info
   end
@@ -171,7 +171,7 @@ def perform_node_install
     action :install
   end
 
-  ruby_block "logging" do
+  ruby_block "perform_node_install_4" do
     block do
       Chef::Log.info("Installed node version: #{`node -v`}".strip)
     end
@@ -180,35 +180,35 @@ def perform_node_install
 end
 
 def perform_yarn_install
-  log 'perform_yarn_install' do
+  log 'perform_yarn_install_1' do
     message "Currently installed yarn version: #{`yarn --version` rescue "(none)"}"
     level :info
   end
 
   package_json_path = File.join(release_path, 'package.json')
 
-  log 'perform_yarn_install' do
+  log 'perform_yarn_install_2' do
     message 'No package.json file found in project. Skipping yarn install.'
     level :warn
     not_if { File.exist?(package_json_path) }
   end
   return unless File.exist?(package_json_path)
 
-  log 'perform_yarn_install' do
+  log 'perform_yarn_install_3' do
     message 'Installing the latest version of yarn...'
     level :info
   end
 
   include_recipe 'yarn::upgrade_package'
 
-  ruby_block "logging" do
+  ruby_block "perform_yarn_install_4" do
     block do
       Chef::Log.info("Installed yarn version: #{`yarn --version`}".strip)
     end
     action :run
   end
 
-  log 'perform_yarn_install' do
+  log 'perform_yarn_install_5' do
     message 'Linking node_modules to shared node_modules...'
     level :info
   end
@@ -226,7 +226,7 @@ def perform_yarn_install
     to shared_node_modules_path
   end
 
-  log 'perform_yarn_install' do
+  log 'perform_yarn_install_6' do
     message 'Running yarn install...'
     level :info
   end
