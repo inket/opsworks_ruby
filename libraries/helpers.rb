@@ -95,9 +95,11 @@ def perform_ruby_build
 
   log 'perform_ruby_build' do
     message "Currently installed ruby version: #{`ruby -v` rescue "(none)"}"
+    level :info
   end
   log 'perform_ruby_build' do
     message "Installing detected ruby version: #{ruby_version} (from .ruby-version)"
+    level :info
   end
 
   include_recipe 'ruby_build::default'
@@ -136,6 +138,7 @@ end
 def perform_node_install
   log 'perform_node_install' do
     message "Currently installed node version: #{`node -v` rescue "(none)"}"
+    level :info
   end
 
   nvmrc_path = File.join(release_path, '.nvmrc')
@@ -151,6 +154,7 @@ def perform_node_install
 
   log 'perform_node_install' do
     message "Installing detected nodejs version: #{node_version} (from .nvmrc)"
+    level :info
   end
 
   # Construct the URL for downloading the nodejs binary
@@ -178,6 +182,7 @@ end
 def perform_yarn_install
   log 'perform_yarn_install' do
     message "Currently installed yarn version: #{`yarn --version` rescue "(none)"}"
+    level :info
   end
 
   package_json_path = File.join(release_path, 'package.json')
@@ -191,6 +196,7 @@ def perform_yarn_install
 
   log 'perform_yarn_install' do
     message 'Installing the latest version of yarn...'
+    level :info
   end
 
   include_recipe 'yarn::upgrade_package'
@@ -204,6 +210,7 @@ def perform_yarn_install
 
   log 'perform_yarn_install' do
     message 'Linking node_modules to shared node_modules...'
+    level :info
   end
   shared_node_modules_path = File.join(release_path, '..', '..', 'shared', 'node_modules')
   directory shared_node_modules_path do
@@ -221,6 +228,7 @@ def perform_yarn_install
 
   log 'perform_yarn_install' do
     message 'Running yarn install...'
+    level :info
   end
   yarn_install_production release_path do
     user node['deployer']['user'] || 'root'
