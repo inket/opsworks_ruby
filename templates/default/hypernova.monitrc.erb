@@ -1,6 +1,6 @@
 <% ([@out[:process_count].to_i || 1].max).times do |n| %>
     <% identifier = "#{@application}-#{n+1}" %>
-    <% log_file = "#{@deploy_to}/shared/log/hypernova.log" %>
+    <% log_file = "#{@deploy_to}/shared/log/hypernova_#{identifier}.log" %>
     <% pid_file = "#{@deploy_to}/shared/pids/hypernova_#{identifier}.pid" %>
 
     check process hypernova_<%= identifier.to_s %>

@@ -49,6 +49,8 @@ module Drivers
             retries 3
           end
         end
+
+        check_status
       end
 
       def unmonitor_monit
@@ -74,6 +76,35 @@ module Drivers
       def environment
         framework = Drivers::Framework::Factory.build(context, app, options)
         app['environment'].merge(framework.out[:deploy_environment] || {})
+      end
+
+      def check_status
+        deploy_to = deploy_dir(app)
+
+        (1..process_count).each do |process_number|
+          name = "#{adapter}_#{app['shortname']}-#{process_number}"
+          log_file = "#{deploy_to}/shared/log/#{name}.log"
+          pid_file = "#{deploy_to}/shared/pids/#{name}.pid"
+
+          context.ruby_block 'check_status' do
+            block do
+              begin
+                pid = File.read(pid_file).strip
+                command = "/bin/ps -q #{pid}"
+
+                r = Chef::Resource::Execute.new(command, run_context)
+                r.command command
+                r.returns 0
+                r.run_action(:run)
+              rescue StandardError => e
+                Chef::Log.fatal("Could not start #{name} correctly.")
+                Chef::Log.info("Printing #{log_file}…")
+                Chef::Log.info(File.exist?(log_file) ? File.read(log_file) : '(does not exist)')
+                raise e
+              end
+            end
+          end
+        end
       end
     end
   end
