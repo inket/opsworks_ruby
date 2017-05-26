@@ -89,11 +89,11 @@ module Drivers
           context.ruby_block 'check_status' do
             block do
               begin
-                pid = File.read(pid_file).strip
-                command = "/bin/ps -q #{pid}"
+                command = "/bin/ps -q $(cat #{pid_file})"
 
                 r = Chef::Resource::Execute.new(command, run_context)
                 r.command command
+                r.retries 3
                 r.returns 0
                 r.run_action(:run)
               rescue StandardError => e
