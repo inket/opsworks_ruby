@@ -94,7 +94,7 @@ def perform_ruby_build
   ruby_version = File.read(File.join(release_path, '.ruby-version')).strip
 
   log 'perform_ruby_build_1' do
-    message "Currently installed ruby version: #{`ruby -v` rescue "(none)"}"
+    message "Currently installed ruby version: #{`ruby -v`.strip rescue "(none)"}"
     level :info
   end
   log 'perform_ruby_build_2' do
@@ -137,7 +137,7 @@ end
 
 def perform_node_install
   log 'perform_node_install_1' do
-    message "Currently installed node version: #{`node -v` rescue "(none)"}"
+    message "Currently installed node version: #{`node -v`.strip rescue "(none)"}"
     level :info
   end
 
@@ -181,7 +181,7 @@ end
 
 def perform_yarn_install
   log 'perform_yarn_install_1' do
-    message "Currently installed yarn version: #{`yarn --version` rescue "(none)"}"
+    message "Currently installed yarn version: #{`yarn --version`.strip rescue "(none)"}"
     level :info
   end
 
