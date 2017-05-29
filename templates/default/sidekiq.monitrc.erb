@@ -2,7 +2,7 @@
     <% identifier = "#{@application}-#{n+1}" %>
     <% conf_file = "#{@deploy_to}/shared/config/sidekiq_#{n+1}.yml" %>
     <% pid_file = "#{@deploy_to}/shared/pids/sidekiq_#{identifier}.pid" %>
-    <% log_file = "#{@deploy_to}/shared/log/hypernova_#{identifier}.log" %>
+    <% log_file = "#{@deploy_to}/shared/log/sidekiq_#{identifier}.log" %>
     <% to_require = @out[:require].present? ? " -r #{File.join(@deploy_to, 'current', @out[:require])}" : '' %>
     <% timeout = (@out[:config]['timeout'] || 8).to_i %>
 

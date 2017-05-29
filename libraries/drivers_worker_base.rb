@@ -94,6 +94,7 @@ module Drivers
                 r = Chef::Resource::Execute.new(command, run_context)
                 r.command command
                 r.retries 3
+                r.retry_delay 5
                 r.returns 0
                 r.run_action(:run)
               rescue StandardError => e
