@@ -24,6 +24,9 @@ module Drivers
         rdses.each do |rds|
           database_yml(Drivers::Db::Factory.build(context, app, rds: rds))
         end
+
+        add_htpasswd_config
+
         super
       end
 
@@ -45,6 +48,28 @@ module Drivers
           owner node['deployer']['user'] || 'root'
           group www_group
           variables(database: database, environment: deploy_environment)
+        end
+      end
+
+      def add_htpasswd_config
+        htpasswd_config = (node['deploy'][app['shortname']]['htpasswd'] || {}).symbolize_keys
+        user = htpasswd_config[:user]
+        password = htpasswd_config[:password]
+
+        htpasswd_config_path = File.join(deploy_dir(app), 'shared', 'htpasswd')
+
+        context.file htpasswd_config_path do
+          action :delete
+          only_if { File.exist?(htpasswd_config_path) }
+        end
+
+        return unless user && password
+        context.template htpasswd_config_path do
+          mode '0660'
+          owner node['deployer']['user'] || 'root'
+          group www_group
+          source 'htpasswd.erb'
+          variables(user: user, password: password)
         end
       end
 

@@ -20,6 +20,11 @@ server {
   send_timeout <%= @out[:send_timeout] || '10' %>;
 
   location / {
+    <% if @application[:htpasswd] %>
+    auth_basic "Restricted";
+    auth_basic_user_file <%= @deploy_dir.to_s %>/shared/htpasswd;
+    <% end %>
+
     try_files $uri/index.html $uri/index.htm @<%= @name %>;
   }
 
@@ -112,6 +117,11 @@ server {
   send_timeout <%= @out[:send_timeout] || '10' %>;
 
   location / {
+    <% if @application[:htpasswd] %>
+    auth_basic "Restricted";
+    auth_basic_user_file <%= @deploy_dir.to_s %>/shared/htpasswd;
+    <% end %>
+
     try_files $uri/index.html $uri/index.htm @<%= @name %>;
   }
 
