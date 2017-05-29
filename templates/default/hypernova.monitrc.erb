@@ -6,6 +6,6 @@
     check process hypernova_<%= identifier.to_s %>
     with pidfile <%= pid_file.to_s %>
     start program = "/bin/su - <%= node['deployer']['user'] %> -c 'cd <%= File.join(@deploy_to, 'current') %> && yarn hypernova:start > <%= log_file.to_s %> 2>&1 & echo $! > <%= pid_file.to_s %>'" with timeout 90 seconds
-    stop  program = "/bin/su - <%= node['deployer']['user'] %> -c 'kill -s TERM `cat <%= pid_file.to_s %>`'" with timeout 90 seconds
+    stop  program = "/bin/su - <%= node['deployer']['user'] %> -c 'kill -TERM -- -$(ps ax -o pgid= -q $(cat <%= pid_file.to_s %>) | xargs)'" with timeout 90 seconds
     group hypernova_<%= @application.to_s %>_group
 <% end %>
