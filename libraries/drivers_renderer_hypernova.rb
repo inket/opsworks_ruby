@@ -3,10 +3,6 @@
 module Drivers
   module Renderer
     class Hypernova < Drivers::Renderer::Base
-      adapter :hypernova
-      output filter: %i[process_count]
-      packages :monit
-
       def enabled?
         deploy_to = deploy_dir(app)
         release_path = Dir[File.join(deploy_to, 'releases', '*')].last
@@ -19,21 +15,13 @@ module Drivers
         scripts.has_key?('hypernova:start')
       end
 
-      def configure
-        add_worker_monit
+      def start_command
+        "cd #{current_dir} && yarn hypernova:start > #{log_file} 2>&1 & echo $! > #{pid_file}"
       end
 
-      def after_deploy
-        return unless enabled?
-
-        restart_monit
+      def stop_command
+        "pkill -TERM -g $(ps ax -o pgid= -q $(cat '#{pid_file}') | xargs)"
       end
-
-      def shutdown
-        stop_monit
-      end
-
-      alias after_undeploy after_deploy
     end
   end
 end

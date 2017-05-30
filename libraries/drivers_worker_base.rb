@@ -45,7 +45,7 @@ module Drivers
 
       def restart_monit
         (1..process_count).each do |process_number|
-          context.execute "monit restart #{adapter}_#{app['shortname']}-#{process_number} > #{deploy_dir(app)}/shared/log/monit_restart_#{adapter}.log 2>&1" do
+          context.execute "monit restart #{adapter}_#{app['shortname']}-#{process_number}" do
             retries 3
           end
         end
@@ -89,12 +89,11 @@ module Drivers
           context.ruby_block 'check_status' do
             block do
               begin
-                command = "/bin/ps -q $(cat #{pid_file})"
+                command = "/bin/sleep 5 && /bin/ps -q $(cat #{pid_file})"
 
                 r = Chef::Resource::Execute.new(command, run_context)
                 r.command command
                 r.retries 3
-                r.retry_delay 5
                 r.returns 0
                 r.run_action(:run)
               rescue StandardError => e
