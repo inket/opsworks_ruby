@@ -27,6 +27,11 @@ module Drivers
       end
 
       def setup
+        # Including the chef_nginx recipe will cause nginx to restart; We need to update nginx' settings
+        # before the restart otherwise we could be stuck in a corrupted loop where nginx can't restart
+        # because of a broken configuration that we can't update.
+        add_appserver_config
+
         node.default['nginx']['package_name'] = 'nginx-extras'
         node.default['nginx']['install_method'] = out[:build_type].to_s == 'source' ? 'source' : 'package'
         recipe = out[:build_type].to_s == 'source' ? 'source' : 'default'
