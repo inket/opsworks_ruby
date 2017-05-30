@@ -28,6 +28,39 @@ server {
     try_files $uri/index.html $uri/index.htm @<%= @name %>;
   }
 
+  ### Maintenance mode configuration ###############################
+
+  # Enable the maintenance mode if the maintenance.html file exists
+  if ( -e /var/nginx/html/maintenance/maintenance.html ) {
+    set $maintenance true;
+  }
+
+  # If /healthcheck is requested, just serve it without modifications
+  if ( $request_uri ~ /healthcheck ) {
+    set $maintenance false;
+  }
+
+  # If maintenance.html is requested, just serve it without modifications
+  if ( $request_uri ~ /maintenance.html ) {
+    set $maintenance false;
+  }
+
+  # Permit this IP address to skip the maintenance page
+  if ( $remote_addr = "219.119.136.178" ) {
+    set $maintenance false;
+  }
+
+  # Redirect all pages to /maintenance.html
+  if ( $maintenance = true ) {
+    rewrite ^ /maintenance.html redirect;
+  }
+
+  location /maintenance.html {
+    alias /var/nginx/html/maintenance/maintenance.html;
+    expires 0;
+  }
+  ### Maintenance mode configuration: end ##########################
+
   location ^~ /assets/ {
     gzip_static on;
     expires max;
@@ -131,6 +164,39 @@ server {
 
     try_files $uri/index.html $uri/index.htm @<%= @name %>;
   }
+
+  ### Maintenance mode configuration ###############################
+
+  # Enable the maintenance mode if the maintenance.html file exists
+  if ( -e /var/nginx/html/maintenance/maintenance.html ) {
+    set $maintenance true;
+  }
+
+  # If /healthcheck is requested, just serve it without modifications
+  if ( $request_uri ~ /healthcheck ) {
+    set $maintenance false;
+  }
+
+  # If maintenance.html is requested, just serve it without modifications
+  if ( $request_uri ~ /maintenance.html ) {
+    set $maintenance false;
+  }
+
+  # Permit this IP address to skip the maintenance page
+  if ( $remote_addr = "219.119.136.178" ) {
+    set $maintenance false;
+  }
+
+  # Redirect all pages to /maintenance.html
+  if ( $maintenance = true ) {
+    rewrite ^ /maintenance.html redirect;
+  }
+
+  location /maintenance.html {
+    alias /var/nginx/html/maintenance/maintenance.html;
+    expires 0;
+  }
+  ### Maintenance mode configuration: end ##########################
 
   location ^~ /assets/ {
     gzip_static on;
