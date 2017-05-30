@@ -45,7 +45,7 @@ module Drivers
 
       def restart_monit
         (1..process_count).each do |process_number|
-          context.execute "monit restart #{adapter}_#{app['shortname']}-#{process_number}" do
+          context.execute "monit restart #{adapter}_#{app['shortname']}-#{process_number} > #{deploy_dir(app)}/shared/log/monit_restart_#{adapter}.log 2>&1" do
             retries 3
           end
         end
