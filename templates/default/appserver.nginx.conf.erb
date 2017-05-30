@@ -20,7 +20,7 @@ server {
   send_timeout <%= @out[:send_timeout] || '10' %>;
 
   location / {
-    <% if @application[:htpasswd] %>
+    <% if node['deploy'][@application['shortname']]['htpasswd'] %>
     auth_basic "Restricted";
     auth_basic_user_file <%= @deploy_dir.to_s %>/shared/htpasswd;
     <% end %>
@@ -117,7 +117,7 @@ server {
   send_timeout <%= @out[:send_timeout] || '10' %>;
 
   location / {
-    <% if @application[:htpasswd] %>
+    <% if node['deploy'][@application['shortname']]['htpasswd'] %>
     auth_basic "Restricted";
     auth_basic_user_file <%= @deploy_dir.to_s %>/shared/htpasswd;
     <% end %>
